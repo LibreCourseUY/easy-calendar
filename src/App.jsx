@@ -22,7 +22,7 @@ function parseEvents(raw) {
   if (!raw || !Array.isArray(raw)) return [];
   return raw.map(e => {
     const [dd, mm, yyyy] = e.date.split('/').map(Number);
-    return { name: e.name, date: new Date(yyyy, mm - 1, dd), type: e.type || 'unknown' };
+    return { name: e.name, date: new Date(yyyy, mm - 1, dd), type: e.type || 'unknown', time: e.time || null };
   }).filter(e => !isNaN(e.date));
 }
 
@@ -66,7 +66,8 @@ function CalendarDay({ day, month, year, events, focusedType, onSelect, isToday,
   if (!day) return <div class="cal-cell empty" />;
   const d = new Date(year, month, day);
   const key = dateKey(d);
-  const evts = events.filter(e => dateKey(e.date) === key);
+  const evts = events.filter(e => dateKey(e.date) === key)
+    .sort((a, b) => (a.time || 'zz:zz').localeCompare(b.time || 'zz:zz'));
   const hasFocused = focusedType !== null;
   const matchesFocus = hasFocused && evts.some(e => e.type === focusedType);
   const dimmed = hasFocused && !matchesFocus;
@@ -99,6 +100,7 @@ function Tooltip({ events, position, onClose }) {
       {events.map((ev, i) => (
         <div key={i} class="tooltip-event">
           <span class="tooltip-dot" style={{ background: typeColor(ev.type) }} />
+          {ev.time && <span class="tooltip-time">{ev.time}</span>}
           <span class="tooltip-name">{ev.name}</span>
           <span class="tooltip-type">{ev.type}</span>
         </div>

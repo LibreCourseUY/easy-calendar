@@ -42,12 +42,14 @@ Each event is an object with three fields:
   {
     "name": "Team Standup",
     "date": "15/01/2026",
-    "type": "meeting"
+    "type": "meeting",
+    "time": "09:00"
   },
   {
     "name": "Project Deadline",
     "date": "28/02/2026",
-    "type": "deadline"
+    "type": "deadline",
+    "time": "17:00"
   }
 ]
 ```
@@ -57,6 +59,7 @@ Each event is an object with three fields:
 | `name` | string      | Event name (displayed in tooltip)  |
 | `date` | `dd/mm/yyyy`| Day/month/year, zero-padded        |
 | `type` | string      | Category name (determines color)   |
+| `time` | `hh:mm` (optional) | Time of day, 24h format; events sort by time in tooltip |
 
 Event types get deterministic colors from their name hash. Each type appears as a filter button in the UI.
 
