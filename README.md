@@ -7,7 +7,7 @@ A lightweight year-view calendar web app built with Preact and Vite. Load your e
 - Month-by-month calendar view with colored event cells
 - Hover/click to see event details in a tooltip
 - Search events by name, click to jump to that date
-- Filter by event type — focused type highlights, others dim
+- Filter by event type (focused type highlights, others dim)
 - Dark mode / light mode (respects system preference)
 - Spanish / English language toggle (Spanish default)
 - Mobile-friendly layout
@@ -70,6 +70,6 @@ Output is in `dist/`.
 
 ## Tech Stack
 
-- [Preact](https://preactjs.com/) — 3kB React alternative
-- [Vite](https://vitejs.dev/) — fast dev server and bundler
+- [Preact](https://preactjs.com/) (3kB React alternative)
+- [Vite](https://vitejs.dev/) (fast dev server and bundler)
 - Vanilla CSS with CSS custom properties for theming
