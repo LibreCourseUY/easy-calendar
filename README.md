@@ -19,10 +19,10 @@ npm install
 npm run dev
 ```
 
-Set your events with the `VITE_CALENDAR_DATA` environment variable:
+Set your events with the `VITE_CALENDAR_DATA` environment variable. Optionally set a custom title with `VITE_CALENDAR_TITLE`:
 
 ```bash
-VITE_CALENDAR_DATA='[{"name":"Meeting","date":"15/01/2026","type":"meeting"}]' npm run dev
+VITE_CALENDAR_TITLE="My Calendar" VITE_CALENDAR_DATA='[{"name":"Meeting","date":"15/01/2026","type":"meeting"}]' npm run dev
 ```
 
 Or load the included sample data:

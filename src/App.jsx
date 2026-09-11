@@ -148,6 +148,7 @@ export function App() {
   }, [tooltip]);
 
   const t = I18N[lang];
+  const title = import.meta.env.VITE_CALENDAR_TITLE || 'Easy Calendar';
 
   const searchResults = useMemo(() => {
     if (!search.trim()) return [];
@@ -210,7 +211,7 @@ export function App() {
   return (
     <div class="app">
       <header>
-        <h1>Easy Calendar</h1>
+        <h1>{title}</h1>
         <div class="header-controls">
           <div class="search-wrap">
             <SearchIcon />
