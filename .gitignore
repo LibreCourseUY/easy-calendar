@@ -1,3 +1,6 @@
 node_modules
 dist
 .env
+
+# Root data files (not part of the app build)
+/*.json

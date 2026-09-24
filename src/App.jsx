@@ -1,9 +1,15 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'preact/hooks';
 import defaultData from '../sample-data.json';
 
+const BASE = (import.meta.env.BASE_URL || '/').replace(/\/+$/, '');
+
 const I18N = {
   es: {
     search: 'Buscar eventos...',
+    back: 'Calendarios',
+    empty: 'No hay calendarios configurados.',
+    notFound: 'Calendario no encontrado.',
+    events: (n) => `${n} evento${n === 1 ? '' : 's'}`,
     months: ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],
     days: ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'],
     langBtn: 'EN',
@@ -11,6 +17,10 @@ const I18N = {
   },
   en: {
     search: 'Search events...',
+    back: 'Calendars',
+    empty: 'No calendars configured.',
+    notFound: 'Calendar not found.',
+    events: (n) => `${n} event${n === 1 ? '' : 's'}`,
     months: ['January','February','March','April','May','June','July','August','September','October','November','December'],
     days: ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],
     langBtn: 'ES',
@@ -18,12 +28,51 @@ const I18N = {
   }
 };
 
+function normalizeEndpoint(p) {
+  return String(p || '').trim().replace(/^\/+|\/+$/g, '');
+}
+
 function parseEvents(raw) {
-  if (!raw || !Array.isArray(raw)) return [];
+  if (!Array.isArray(raw)) return [];
   return raw.map(e => {
-    const [dd, mm, yyyy] = e.date.split('/').map(Number);
+    const [dd, mm, yyyy] = String(e.date).split('/').map(Number);
     return { name: e.name, date: new Date(yyyy, mm - 1, dd), type: e.type || 'unknown', time: e.time || null };
   }).filter(e => !isNaN(e.date));
+}
+
+function parseCalendars(raw) {
+  const list = Array.isArray(raw) ? raw : Array.isArray(raw?.calendars) ? raw.calendars : [];
+  return list.map(c => {
+    const endpoint = normalizeEndpoint(c.endpoint);
+    return {
+      endpoint,
+      name: c.name || endpoint,
+      description: c.description || '',
+      events: parseEvents(c.events),
+    };
+  }).filter(c => c.endpoint && c.name);
+}
+
+function usePathname() {
+  const [path, setPath] = useState(() => window.location.pathname);
+  useEffect(() => {
+    const onPop = () => setPath(window.location.pathname);
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, []);
+  return path;
+}
+
+function navigate(to) {
+  if (window.location.pathname === to) return;
+  window.history.pushState(null, '', to);
+  window.dispatchEvent(new PopStateEvent('popstate'));
+}
+
+function slugFromPath(pathname) {
+  let p = pathname;
+  if (BASE && p.startsWith(BASE)) p = p.slice(BASE.length);
+  return p.replace(/^\/+|\/+$/g, '');
 }
 
 function hashType(type) {
@@ -60,6 +109,51 @@ function MoonIcon() {
 
 function GithubIcon() {
   return <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>;
+}
+
+function HeaderControls({ t, dark, setDark, lang, setLang, children }) {
+  return (
+    <div class="header-controls">
+      {children}
+      <button class="lang-toggle" onClick={() => setLang(l => l === 'es' ? 'en' : 'es')}>{t.langBtn}</button>
+      <button class="theme-toggle" onClick={() => setDark(d => !d)} title={t.themeTip}>
+        {dark ? <SunIcon /> : <MoonIcon />}
+      </button>
+      <a class="gh-link" href="https://github.com/LibreCourseUY/easy-calendar" target="_blank" rel="noopener noreferrer" title="GitHub">
+        <GithubIcon />
+      </a>
+    </div>
+  );
+}
+
+function CardBoard({ calendars, heading, t, notFound, dark, setDark, lang, setLang }) {
+  return (
+    <>
+      <header>
+        <h1>{heading}</h1>
+        <HeaderControls t={t} dark={dark} setDark={setDark} lang={lang} setLang={setLang} />
+      </header>
+      {notFound && <p class="board-note">{t.notFound}</p>}
+      {calendars.length === 0
+        ? (!notFound && <p class="board-note">{t.empty}</p>)
+        : (
+          <div class="board">
+            {calendars.map(c => (
+              <a
+                key={c.endpoint}
+                class="card"
+                href={`${BASE}/${c.endpoint}`}
+                onClick={e => { e.preventDefault(); navigate(`${BASE}/${c.endpoint}`); }}
+              >
+                <h3 class="card-title">{c.name}</h3>
+                {c.description && <p class="card-desc">{c.description}</p>}
+                <span class="card-count">{t.events(c.events.length)}</span>
+              </a>
+            ))}
+          </div>
+        )}
+    </>
+  );
 }
 
 function CalendarDay({ day, month, year, events, focusedType, onSelect, isToday, dark }) {
@@ -110,15 +204,8 @@ function Tooltip({ events, position, onClose }) {
   );
 }
 
-export function App() {
-  const raw = useMemo(() => {
-    try {
-      const v = import.meta.env.VITE_CALENDAR_DATA;
-      return v ? JSON.parse(v) : defaultData;
-    } catch { return defaultData; }
-  }, []);
-
-  const allEvents = useMemo(() => parseEvents(raw), [raw]);
+function CalendarView({ calendar, t, dark, setDark, lang, setLang, onBack }) {
+  const allEvents = calendar.events;
   const eventTypes = useMemo(() => [...new Set(allEvents.map(e => e.type))].sort(), [allEvents]);
 
   const today = new Date();
@@ -128,14 +215,7 @@ export function App() {
   const [focusedType, setFocusedType] = useState(null);
   const [tooltip, setTooltip] = useState(null);
   const [tooltipPos, setTooltipPos] = useState({ x: 0, y: 0 });
-  const [dark, setDark] = useState(() => window.matchMedia('(prefers-color-scheme: dark)').matches);
-  const [lang, setLang] = useState('es');
   const selectedRef = useRef(false);
-
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', dark);
-    document.documentElement.classList.toggle('light', !dark);
-  }, [dark]);
 
   useEffect(() => {
     if (!tooltip) { selectedRef.current = false; return; }
@@ -148,10 +228,6 @@ export function App() {
     document.addEventListener('click', handler);
     return () => document.removeEventListener('click', handler);
   }, [tooltip]);
-
-  const t = I18N[lang];
-  const title = import.meta.env.VITE_CALENDAR_TITLE;
-  const heading = title ? `Easy Calendar \u2013 ${title}` : 'Easy Calendar';
 
   const searchResults = useMemo(() => {
     if (!search.trim()) return [];
@@ -169,23 +245,12 @@ export function App() {
   const handleSelect = useCallback((evts, e, isTouch) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const cellW = rect.width;
-    const cellH = rect.height;
     const tipW = 260;
     const tipH = evts.length * 36 + 16;
 
-    let x, y;
-
-    if (isTouch) {
-      x = rect.left + cellW / 2 - tipW / 2;
-      y = rect.top - tipH - 8;
-      if (y < 8) y = rect.bottom + 8;
-    } else {
-      x = rect.left + cellW / 2 - tipW / 2;
-      y = rect.top - tipH - 8;
-      if (y < 8) {
-        y = rect.bottom + 8;
-      }
-    }
+    let x = rect.left + cellW / 2 - tipW / 2;
+    let y = rect.top - tipH - 8;
+    if (y < 8) y = rect.bottom + 8;
 
     if (x < 8) x = 8;
     if (x + tipW > window.innerWidth - 8) x = window.innerWidth - tipW - 8;
@@ -212,10 +277,11 @@ export function App() {
   for (let d = 1; d <= totalDays; d++) cells.push(d);
 
   return (
-    <div class="app">
+    <>
       <header>
-        <h1>{heading}</h1>
-        <div class="header-controls">
+        <button class="back-btn" onClick={onBack}>&#8249; {t.back}</button>
+        <h1>{calendar.name}</h1>
+        <HeaderControls t={t} dark={dark} setDark={setDark} lang={lang} setLang={setLang}>
           <div class="search-wrap">
             <SearchIcon />
             <input
@@ -237,15 +303,9 @@ export function App() {
               </div>
             )}
           </div>
-          <button class="lang-toggle" onClick={() => setLang(l => l === 'es' ? 'en' : 'es')}>{t.langBtn}</button>
-          <button class="theme-toggle" onClick={() => setDark(d => !d)} title={t.themeTip}>
-            {dark ? <SunIcon /> : <MoonIcon />}
-          </button>
-          <a class="gh-link" href="https://github.com/LibreCourseUY/easy-calendar" target="_blank" rel="noopener noreferrer" title="GitHub">
-            <GithubIcon />
-          </a>
-        </div>
+        </HeaderControls>
       </header>
+      {calendar.description && <p class="cal-desc">{calendar.description}</p>}
 
       <div class="filters">
         {eventTypes.map(tp => (
@@ -285,6 +345,64 @@ export function App() {
       </div>
 
       <Tooltip events={tooltip} position={tooltipPos} onClose={handleDeselect} />
+    </>
+  );
+}
+
+export function App() {
+  const raw = useMemo(() => {
+    try {
+      const v = import.meta.env.VITE_CALENDAR_DATA;
+      return v ? JSON.parse(v) : defaultData;
+    } catch { return defaultData; }
+  }, []);
+
+  const calendars = useMemo(() => parseCalendars(raw), [raw]);
+  const pathname = usePathname();
+  const slug = slugFromPath(pathname);
+  const calendar = calendars.find(c => c.endpoint === slug);
+
+  const [dark, setDark] = useState(() => window.matchMedia('(prefers-color-scheme: dark)').matches);
+  const [lang, setLang] = useState('es');
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', dark);
+    document.documentElement.classList.toggle('light', !dark);
+  }, [dark]);
+
+  useEffect(() => {
+    document.title = calendar ? `${calendar.name} – Easy Calendar` : 'Easy Calendar';
+  }, [calendar]);
+
+  const t = I18N[lang];
+  const title = import.meta.env.VITE_CALENDAR_TITLE;
+  const heading = title ? `Easy Calendar \u2013 ${title}` : 'Easy Calendar';
+
+  const goHome = useCallback(() => navigate(BASE || '/'), []);
+
+  return (
+    <div class="app">
+      {calendar
+        ? <CalendarView
+            key={calendar.endpoint}
+            calendar={calendar}
+            t={t}
+            dark={dark}
+            setDark={setDark}
+            lang={lang}
+            setLang={setLang}
+            onBack={goHome}
+          />
+        : <CardBoard
+            calendars={calendars}
+            heading={heading}
+            t={t}
+            notFound={!!slug}
+            dark={dark}
+            setDark={setDark}
+            lang={lang}
+            setLang={setLang}
+          />}
     </div>
   );
 }

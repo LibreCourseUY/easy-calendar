@@ -42,6 +42,18 @@ h1{font-size:1.4rem;font-weight:700;white-space:nowrap}
 .theme-toggle:hover,.gh-link:hover,.lang-toggle:hover{background:var(--hover)}
 .lang-toggle{font-size:.8rem;font-weight:600;padding:6px 10px}
 
+.back-btn{display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:6px 10px;cursor:pointer;color:var(--text);font-size:.85rem;font-weight:600;flex-shrink:0;transition:background .15s}
+.back-btn:hover{background:var(--hover)}
+
+.board{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.card{display:flex;flex-direction:column;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;text-decoration:none;color:var(--text);box-shadow:var(--shadow);transition:transform .15s,box-shadow .15s,border-color .15s}
+.card:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,0,0,.12);border-color:var(--accent)}
+.card-title{font-size:1rem;font-weight:700}
+.card-desc{color:var(--text2);font-size:.83rem;line-height:1.4;flex:1}
+.card-count{color:var(--text2);font-size:.72rem;text-transform:uppercase;letter-spacing:.4px;margin-top:4px}
+.board-note{color:var(--text2);text-align:center;padding:24px 0}
+.cal-desc{color:var(--text2);font-size:.85rem;text-align:center;margin-bottom:12px}
+
 .filters{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
 .filter-btn{display:flex;align-items:center;gap:6px;padding:5px 12px;border:1px solid var(--border);border-radius:20px;background:var(--surface);color:var(--text);font-size:.8rem;cursor:pointer;transition:all .15s}
 .filter-btn:hover{background:var(--hover)}
@@ -81,8 +93,10 @@ h1{font-size:1.4rem;font-weight:700;white-space:nowrap}
   .app{padding:10px}
   header{flex-direction:column;align-items:stretch}
   h1{text-align:center;font-size:1.2rem}
+  .back-btn{align-self:flex-start}
   .header-controls{justify-content:center}
   .search-wrap{max-width:100%}
+  .board{grid-template-columns:1fr}
   .cal-cell{aspect-ratio:auto;min-height:44px;font-size:.75rem;padding:6px 0}
   .cal-header{font-size:.65rem;padding:6px 0}
   .month-nav h2{font-size:1rem;min-width:auto;flex:1}
