@@ -230,6 +230,7 @@ export function App() {
                   <div key={i} class="search-result" onClick={() => goToEvent(ev)}>
                     <span class="sr-dot" style={{ background: typeColor(ev.type) }} />
                     <span class="sr-name">{ev.name}</span>
+                    <span class="sr-type">{ev.type}</span>
                     <span class="sr-date">{String(ev.date.getDate()).padStart(2,'0')}/{String(ev.date.getMonth()+1).padStart(2,'0')}/{ev.date.getFullYear()}</span>
                   </div>
                 ))}

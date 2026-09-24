@@ -31,10 +31,11 @@ h1{font-size:1.4rem;font-weight:700;white-space:nowrap}
 .search-wrap input::placeholder{color:var(--text2)}
 
 .search-results{position:absolute;top:100%;left:0;right:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);z-index:100;max-height:300px;overflow-y:auto;margin-top:4px}
-.search-result{display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer;font-size:.85rem}
+.search-result{display:flex;align-items:flex-start;gap:8px;padding:8px 12px;cursor:pointer;font-size:.85rem}
 .search-result:hover{background:var(--hover)}
-.sr-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.sr-name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sr-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.sr-name{flex:1;min-width:0;word-break:break-word}
+.sr-type{color:var(--text2);font-size:.72rem;text-transform:uppercase;letter-spacing:.3px;flex-shrink:0}
 .sr-date{color:var(--text2);font-size:.8rem;flex-shrink:0}
 
 .theme-toggle,.gh-link,.lang-toggle{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:6px 8px;cursor:pointer;display:flex;align-items:center;color:var(--text);text-decoration:none;flex-shrink:0;transition:background .15s}
@@ -68,9 +69,9 @@ h1{font-size:1.4rem;font-weight:700;white-space:nowrap}
 .dot.more{width:auto;height:auto;font-size:.5rem;color:var(--text2);background:none;border:none}
 
 .tooltip{position:fixed;z-index:200;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:8px 0;min-width:200px;max-width:300px}
-.tooltip-event{display:flex;align-items:center;gap:8px;padding:6px 14px;font-size:.82rem}
-.tooltip-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.tooltip-name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tooltip-event{display:flex;align-items:flex-start;gap:8px;padding:6px 14px;font-size:.82rem}
+.tooltip-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.tooltip-name{flex:1;min-width:0;word-break:break-word}
 .tooltip-type{color:var(--text2);font-size:.75rem;flex-shrink:0}
 .tooltip-time{color:var(--text2);font-size:.75rem;flex-shrink:0;font-variant-numeric:tabular-nums}
 .tooltip-close{position:absolute;top:4px;right:8px;cursor:pointer;color:var(--text2);font-size:1rem;line-height:1;padding:2px 6px}
