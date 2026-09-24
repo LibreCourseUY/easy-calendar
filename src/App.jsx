@@ -95,6 +95,31 @@ function daysInMonth(y, m) { return new Date(y, m + 1, 0).getDate(); }
 function startDay(y, m) { return new Date(y, m, 1).getDay(); }
 function dateKey(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
 
+function computeTooltipPos(rect, tipW, tipH, vw, vh) {
+  const gap = 8;
+  const margin = 8;
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+  const maxX = Math.max(margin, vw - tipW - margin);
+  const maxY = Math.max(margin, vh - tipH - margin);
+
+  const candidates = [
+    { x: cx - tipW / 2, y: rect.top - gap - tipH },
+    { x: cx - tipW / 2, y: rect.bottom + gap },
+    { x: rect.left - gap - tipW, y: cy - tipH / 2 },
+    { x: rect.right + gap, y: cy - tipH / 2 },
+  ];
+
+  let best = null;
+  for (const c of candidates) {
+    const x = Math.min(Math.max(c.x, margin), maxX);
+    const y = Math.min(Math.max(c.y, margin), maxY);
+    const overflow = Math.abs(x - c.x) + Math.abs(y - c.y);
+    if (!best || overflow < best.overflow) best = { x, y, overflow };
+  }
+  return best;
+}
+
 function SearchIcon() {
   return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>;
 }
@@ -171,8 +196,8 @@ function CalendarDay({ day, month, year, events, focusedType, onSelect, isToday,
     <div
       class={`cal-cell${isToday ? ' today' : ''}${evts.length ? ' has-events' : ''}${dimmed ? ' dimmed' : ''}`}
       style={bg ? { background: bg } : undefined}
-      onMouseEnter={e => evts.length && onSelect(evts, e, false)}
-      onTouchStart={e => evts.length && onSelect(evts, e, true)}
+      onMouseEnter={e => evts.length && onSelect(evts, e)}
+      onTouchStart={e => evts.length && onSelect(evts, e)}
     >
       <span class="day-num">{day}</span>
       {evts.length > 0 && (
@@ -242,22 +267,15 @@ function CalendarView({ calendar, t, dark, setDark, lang, setLang, onBack }) {
     setTooltip(null);
   }, []);
 
-  const handleSelect = useCallback((evts, e, isTouch) => {
+  const handleSelect = useCallback((evts, e) => {
     const rect = e.currentTarget.getBoundingClientRect();
-    const cellW = rect.width;
     const tipW = 260;
     const tipH = evts.length * 36 + 16;
-
-    let x = rect.left + cellW / 2 - tipW / 2;
-    let y = rect.top - tipH - 8;
-    if (y < 8) y = rect.bottom + 8;
-
-    if (x < 8) x = 8;
-    if (x + tipW > window.innerWidth - 8) x = window.innerWidth - tipW - 8;
+    const pos = computeTooltipPos(rect, tipW, tipH, window.innerWidth, window.innerHeight);
 
     selectedRef.current = true;
     setTooltip(evts);
-    setTooltipPos({ x, y });
+    setTooltipPos(pos);
   }, []);
 
   const handleDeselect = useCallback(() => {

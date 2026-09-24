@@ -80,7 +80,7 @@ h1{font-size:1.4rem;font-weight:700;white-space:nowrap}
 .dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
 .dot.more{width:auto;height:auto;font-size:.5rem;color:var(--text2);background:none;border:none}
 
-.tooltip{position:fixed;z-index:200;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:8px 0;min-width:200px;max-width:300px}
+.tooltip{position:fixed;z-index:200;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:8px 0;min-width:200px;max-width:300px;max-height:calc(100vh - 16px);overflow-y:auto}
 .tooltip-event{display:flex;align-items:flex-start;gap:8px;padding:6px 14px;font-size:.82rem}
 .tooltip-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}
 .tooltip-name{flex:1;min-width:0;word-break:break-word}
